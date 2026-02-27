@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(uv:*)",
+      "Bash(pip install:*)",
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(timeout 8 .venv/Scripts/streamlit.exe run:*)"
+    ]
+  }
+}
