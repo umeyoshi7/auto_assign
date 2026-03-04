@@ -372,6 +372,12 @@ def main():
         with st.sidebar:
             st.header("設定")
 
+            try:
+                version = st.secrets["VERSION"]
+                st.caption(f"バージョン: {version}")
+            except (KeyError, FileNotFoundError):
+                pass
+
             data_source = st.radio(
                 "データソース",
                 ["ローカルCSVファイル", "OCR結果を利用"],
