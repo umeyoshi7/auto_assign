@@ -208,7 +208,13 @@ def ocr_reports_to_dataframes(reports: list[dict]) -> dict[str, pd.DataFrame]:
             try:
                 rt = float(p["rt"])
                 area_pct = float(p["area_pct"])
-                rows.append({"RT": rt, "%Area": area_pct})
+                row = {"RT": rt, "%Area": area_pct}
+                if p.get("area") is not None:
+                    try:
+                        row["面積(μV秒)"] = float(p["area"])
+                    except (TypeError, ValueError):
+                        pass
+                rows.append(row)
             except (KeyError, TypeError, ValueError):
                 continue
         if not rows:
@@ -272,9 +278,13 @@ def build_aggregation_table(
                 closest = min(candidates, key=lambda c: abs(c - o_rrt))
                 used_cols.add(closest)
             else:
-                # 新規列を挿入
-                columns.append(o_rrt)
-                used_cols.add(o_rrt)
+                # 新規列を挿入（既存列と4桁表示が重複しないよう微小値で調整）
+                new_col = o_rrt
+                existing_headers = {f"{c:.4f}" for c in columns}
+                while f"{new_col:.4f}" in existing_headers:
+                    new_col += 0.0001
+                columns.append(new_col)
+                used_cols.add(new_col)
                 # 列をRRT順にソート
                 columns.sort()
 
@@ -365,7 +375,7 @@ def main():
         # 既存 OCR 結果がある場合はプレビューを常時表示
         if "ocr_results" in st.session_state:
             st.subheader("抽出結果プレビュー")
-            st.caption("行：項目名（RT / %Area）、列：ピーク番号")
+            st.caption("行：項目名（RT / %Area / 面積(μV秒)）、列：ピーク番号")
             for name, df in st.session_state["ocr_results"].items():
                 st.markdown(f"**{name}**")
                 st.dataframe(df.T, use_container_width=True)
