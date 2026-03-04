@@ -81,10 +81,14 @@ def get_azure_client():
             "`.streamlit/secrets.toml` に `AZURE_OPENAI_KEY` と `AZURE_OPENAI_ENDPOINT` を設定してください。"
         )
         return None
+    try:
+        api_version = st.secrets["AZURE_OPENAI_API_VERSION"]
+    except (KeyError, FileNotFoundError):
+        api_version = "2024-02-15-preview"
     return openai.AzureOpenAI(
         api_key=key,
         azure_endpoint=endpoint,
-        api_version="2024-02-15-preview",
+        api_version=api_version,
     )
 
 
